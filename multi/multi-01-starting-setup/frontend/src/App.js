@@ -45,8 +45,8 @@ function App() {
           text: goalText,
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       const resData = await response.json();
