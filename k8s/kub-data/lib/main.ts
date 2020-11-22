@@ -9,8 +9,13 @@ export class MyChart extends k.Chart {
     const storyDeployment = new kplus.Deployment(this, 'story-deployment', {
       containers: [
         {
-          image: 'ayush987goyal/kub-data-demo',
-          port: 3000,
+          image: 'ayush987goyal/kub-data-demo:1',
+          volumeMounts: [
+            {
+              path: '/app/story',
+              volume: kplus.Volume.fromEmptyDir('story-volume'),
+            },
+          ],
         },
       ],
     });
