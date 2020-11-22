@@ -72,12 +72,51 @@ class AuthService extends Construct {
   }
 }
 
+class TasksService extends Construct {
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
+
+    const label = { app: 'kub-net-tasks' };
+
+    new KubeService(this, 'tasks-service', {
+      metadata: { name: 'tasks-service' },
+      spec: {
+        selector: label,
+        type: 'LoadBalancer',
+        ports: [{ port: 8000, targetPort: 8000 }],
+      },
+    });
+
+    new KubeDeployment(this, 'tasks-deployment', {
+      spec: {
+        selector: { matchLabels: label },
+        template: {
+          metadata: { labels: label },
+          spec: {
+            containers: [
+              {
+                name: 'tasks',
+                image: 'ayush987goyal/kube-net-demo-tasks:2',
+                env: [
+                  { name: 'AUTH_ADDRESS', value: 'auth-service.default' },
+                  { name: 'TASKS_FOLDER', value: 'tasks' },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
+}
+
 export class MyChart extends k.Chart {
   constructor(scope: Construct, id: string, props: k.ChartProps = {}) {
     super(scope, id, props);
 
     new AuthService(this, 'auth');
     new UsersService(this, 'users');
+    new TasksService(this, 'tasks');
   }
 }
 
