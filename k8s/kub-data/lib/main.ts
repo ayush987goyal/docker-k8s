@@ -3,6 +3,7 @@ import * as k from 'cdk8s';
 
 import {
   KubeService,
+  KubeConfigMap,
   KubeDeployment,
   KubePersistentVolume,
   KubePersistentVolumeClaim,
@@ -15,6 +16,7 @@ export class MyChart extends k.Chart {
     const label = { app: 'kub-data-app' };
     const persistentVolumeName = 'host-pv';
     const persistentVolumeClaimName = 'host-pvc';
+    const configMapName = 'data-store-env';
 
     new KubePersistentVolume(this, 'story-persistent-volume', {
       metadata: { name: persistentVolumeName },
@@ -39,6 +41,13 @@ export class MyChart extends k.Chart {
       },
     });
 
+    new KubeConfigMap(this, 'data-store', {
+      metadata: { name: configMapName },
+      data: {
+        folder: 'story',
+      },
+    });
+
     new KubeService(this, 'story-service', {
       spec: {
         type: 'LoadBalancer',
@@ -59,7 +68,15 @@ export class MyChart extends k.Chart {
             containers: [
               {
                 name: 'story',
-                image: 'ayush987goyal/kub-data-demo:1',
+                image: 'ayush987goyal/kub-data-demo:2',
+                env: [
+                  {
+                    name: 'STORY_FOLDER',
+                    valueFrom: {
+                      configMapKeyRef: { name: configMapName, key: 'folder' },
+                    },
+                  },
+                ],
                 volumeMounts: [
                   { mountPath: '/app/story', name: 'story-volume' },
                 ],
