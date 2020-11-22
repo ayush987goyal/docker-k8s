@@ -26,7 +26,12 @@ class UsersService extends Construct {
             containers: [
               {
                 name: 'users',
-                image: 'ayush987goyal/kube-net-demo-users',
+                image: 'ayush987goyal/kube-net-demo-users:1',
+                env: [{ name: 'AUTH_ADDRESS', value: 'localhost' }],
+              },
+              {
+                name: 'auth',
+                image: 'ayush987goyal/kube-net-demo-auth:1',
               },
             ],
           },
