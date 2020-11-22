@@ -96,11 +96,45 @@ class TasksService extends Construct {
             containers: [
               {
                 name: 'tasks',
-                image: 'ayush987goyal/kube-net-demo-tasks:2',
+                image: 'ayush987goyal/kube-net-demo-tasks:3',
                 env: [
                   { name: 'AUTH_ADDRESS', value: 'auth-service.default' },
                   { name: 'TASKS_FOLDER', value: 'tasks' },
                 ],
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
+}
+
+class Frontend extends Construct {
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
+
+    const label = { app: 'kub-net-frontend' };
+
+    new KubeService(this, 'frontend-service', {
+      metadata: { name: 'frontend-service' },
+      spec: {
+        selector: label,
+        type: 'LoadBalancer',
+        ports: [{ port: 80, targetPort: 80 }],
+      },
+    });
+
+    new KubeDeployment(this, 'frontend-deployment', {
+      spec: {
+        selector: { matchLabels: label },
+        template: {
+          metadata: { labels: label },
+          spec: {
+            containers: [
+              {
+                name: 'frontend',
+                image: 'ayush987goyal/kube-net-demo-frontend:3',
               },
             ],
           },
@@ -117,6 +151,7 @@ export class MyChart extends k.Chart {
     new AuthService(this, 'auth');
     new UsersService(this, 'users');
     new TasksService(this, 'tasks');
+    new Frontend(this, 'frontend');
   }
 }
 
